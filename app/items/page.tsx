@@ -63,7 +63,8 @@ export default function ItemsPage() {
 
   return (
     <main className="p-6 text-white">
-      <h1 className="text-2xl font-bold mb-6">Auction Items 🛒</h1>
+      <input type="/" />
+      <button >new butt</button>
 
       {/* {session ? (
         <>
