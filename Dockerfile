@@ -6,6 +6,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+ENV DATABASE_URL="postgresql://postgres:admin12345@localhost:5433/nextauthdb"
 RUN npx prisma generate
 RUN npm run build
 
