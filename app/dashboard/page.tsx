@@ -1,6 +1,6 @@
 export default function DashBoard(){
     return(
-        <div className="text-center text-4xl m-5">This is your Personal Dashboard</div>
+        <div><h1 className="text-3xl font-bold mb-4 text-center">Dashboard 🧭</h1></div>
         
     )
 }

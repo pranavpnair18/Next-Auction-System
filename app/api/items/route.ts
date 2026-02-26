@@ -9,6 +9,11 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const items = await prisma.auctionItem.findMany({
+     where: {
+  endDate: {
+    gt: new Date(), // only items whose endDate is greater than current time
+  },
+},
       include: {owner: true},
       orderBy: { createdAt: "desc" },
     });

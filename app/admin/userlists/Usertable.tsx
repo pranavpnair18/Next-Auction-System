@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 interface User {
@@ -7,12 +8,17 @@ interface User {
   email: string;
   role: string;
   createdAt: string | Date;
+  _count: {
+    bids: number;
+  }
 }
 
-export default function Usertable({ users }: { users: User[] }) {
+
+export default function Usertable({ users}: { users: User[]}) {
   const [data, setData] = useState(users);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  const {data: session} = useSession()
 
   // 🔍 Filter users dynamically
   const filteredUsers = data.filter((user) => {
@@ -94,78 +100,76 @@ export default function Usertable({ users }: { users: User[] }) {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 dark:border-gray-700">
           <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Role</th>
-              <th className="p-3 text-left">Actions</th>
-            </tr>
-          </thead>
+  <tr>
+    <th className="p-3 text-left">ID</th>
+    <th className="p-3 text-left">Name</th>
+    <th className="p-3 text-left">Email</th>
+    <th className="p-3 text-left">Role</th>
+    <th className="p-3 text-left">Actions</th>
+    <th className="p-3 text-left">Total Bids</th>
+  </tr>
+</thead>
 
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr
-                key={user.id}
-                className="border-t dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <td className="p-3">{user.id}</td>
-                <td className="p-3">{user.name || "—"}</td>
-                <td className="p-3">{user.email}</td>
-                <td className="p-3 font-semibold">
-                  <span
-                    className={`px-2 py-1 rounded ${
-                      user.role === "ADMIN"
-                        ? "bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200"
-                        : user.role === "MODERATOR"
-                        ? "bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
-                        : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
+<tbody>
+  {filteredUsers.map((user) => (
+    <tr key={user.id} className="border-t dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <td className="p-3">{user.id}</td>
+      <td className="p-3">{user.name || "—"}</td>
+      <td className="p-3">{user.email}</td>
+      <td className="p-3 font-semibold">
+        <span
+          className={`px-2 py-1 rounded ${
+            user.role === "ADMIN"
+              ? "bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200"
+              : user.role === "MODERATOR"
+              ? "bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+              : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+          }`}
+        >
+          {user.role}
+        </span>
+      </td>
 
-                <td className="p-3 flex gap-2">
-                  {user.email === "admin@example.com" ? (
-                    <button
-                      disabled
-                      title="This admin cannot be deleted"
-                      className="px-3 py-1 text-sm bg-gray-400 text-white rounded-lg cursor-not-allowed"
-                    >
-                      Locked
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => deleteuser(user)}
-                      className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </td>
+      {/* ✅ All three buttons inside one <td> */}
+      <td className="p-3 flex gap-2">
+  {user.email === "admin@example.com" ? (
+    <button
+      disabled
+      title="This admin cannot be modified"
+      className="px-3 py-1 text-sm bg-gray-400 text-white rounded-lg cursor-not-allowed "
+    >
+      All Actions is Locked for ADMIN
+    </button>
+  ) : (
+    <>
+      {session?.user.role=="ADMIN" && <button
+        onClick={() => deleteuser(user)}
+        className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
+      >
+        Delete
+      </button> }
+      
 
-                <td className="p-3 flex gap-2">
-                  {user.email === "admin@example.com" ? (
-                    <button
-                      disabled
-                      title="This admin cannot be deleted"
-                      className="px-3 py-1 text-sm bg-gray-400 text-white rounded-lg cursor-not-allowed"
-                    >
-                      Locked
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => updateRole(user.id, "MODERATOR")}
-                      className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
-                    >
-                      Promote
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+      <button
+        onClick={() => updateRole(user.id, "MODERATOR")}
+        className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
+      >
+        Promote
+      </button>
+
+      <button
+        onClick={() => updateRole(user.id, "USER")}
+        className="px-3 py-1 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+      >
+        Demote
+      </button>
+    </>
+  )}
+</td>
+<td className="p-3">{user._count.bids}</td>
+    </tr>
+  ))}
+</tbody>
         </table>
       </div>
 

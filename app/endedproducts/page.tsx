@@ -1,32 +1,75 @@
 "use client";
-import { dataStore } from "../datastore/DataStore"
-import { useRouter } from "next/navigation";
 
-export default function EndedProducts(){
-    const router = useRouter();
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Link
+ from "next/link";
+interface AuctionItem {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startingBid: number;
+  endDate: string;
+  owner: { name?: string; email: string };
+}
 
-    const handleViewProduct = (id: number) => {
-        router.push(`/endedproducts/${id}`);
-    };
+export default function ItemsPage() {
+  const [items, setItems] = useState<AuctionItem[]>([]);
+  const { data: session } = useSession();
 
-    return(
-        <div className="text-white">
-            <h1 className="text-center font-extrabold">Ended Auction Page </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 p-6 gap-6">
-                  {dataStore.map((data)=>(
-                    <div key={data.id} className="flex flex-col justify-center text-center items-center border-2 p-4 m-2 border-amber-200 rounded-lg">
-                      <img src={data.img} alt="AuctionImage" className="mb-2" />
-                      <h1 className="font-bold">{data.title}</h1>
-                      <p>{data.desc}</p>
-                      <button 
-                        onClick={() => handleViewProduct(data.id)}
-                        className="mt-4 bg-amber-400 text-black font-bold px-4 py-2 rounded-md hover:bg-amber-500"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  ))}
-                 </div>
-        </div>
-    )
+  // 🟢 Fetch auction items
+  useEffect(() => {
+    async function fetchItems() {
+      const res = await fetch("/api/endeditems");
+      const data = await res.json();
+      setItems(data);
+    }
+    fetchItems();
+  }, []);
+
+  
+  return (
+    <main className="p-6 text-white">
+      <h1 className="text-2xl font-bold mb-6">Ended Auction Items 🛒</h1>
+
+     {session && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div
+              key={item.id}
+              className="bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition"
+            >
+              {item.imageUrl && (
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="w-full h-40 object-cover rounded-lg mb-3"
+                />
+              )}
+              <h2 className="font-semibold text-lg mb-2">{item.title}</h2>
+              <p className="text-sm text-gray-300">{item.description}</p>
+              <p className="text-sm mt-2">💰 ₹{item.startingBid}</p>
+              <p className="text-xs text-gray-400">
+                Ends: {new Date(item.endDate).toLocaleString()}
+              </p>
+              <p className="text-xs mt-1 text-gray-500">
+               Posted by: {item.owner?.name || item.owner.email}
+</p>
+{/* <Link href={`/items/${item.id}`}>
+  <button className="mt-3 bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold">
+    View Details
+  </button>
+</Link> */}
+
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400">No items found 😔</p>
+        )}
+      </div>}
+      
+      
+    </main>
+  );
 }

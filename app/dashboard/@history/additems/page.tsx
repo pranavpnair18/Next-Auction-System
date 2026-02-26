@@ -1,3 +1,4 @@
+"use client"
 import { useSession } from "next-auth/react"
 import React, { useState } from "react"
 
@@ -39,6 +40,15 @@ export default function AddItem(){
     } else {
       alert("❌ Failed to add item");
     }
+
+    setfrom({
+        title: "",
+    description: "",
+    startingBid: "",
+    endDate: "",
+    imageUrl: "",
+
+    })
     }
     return(
                 <>

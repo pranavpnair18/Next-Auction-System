@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { PrismaClient } from "@prisma/client";
+import { logAdminAction } from "@/lib/auditLogger";
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,12 @@ export async function POST(req: Request) {
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { role: newRole },
+    });
+     await logAdminAction({
+                    adminId: Number(session.user.id),
+                    action: "Updated User to",
+                    target: newRole,
+                    details: `User ID: ${userId}`,
     });
     return NextResponse.json({ success: true, user: updated });
   

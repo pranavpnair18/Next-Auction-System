@@ -15,7 +15,7 @@ export default function Navbar() {
     Logged in as <span className="font-semibold">{session.user.email}</span> ({session.user.role})
   </p>
 )}
-      <div className="text-amber-50 font-bold">Bid-Formula</div>
+      <div className="text-amber-50 font-bold"><Link href="/">Bid-Formula</Link></div>
 
       <div className="flex gap-6 items-center">
         
@@ -25,7 +25,7 @@ export default function Navbar() {
           <p className="text-white">Loading...</p>
         ) : session ? (
           <>
-          {session.user.role == "ADMIN" && <Link href="/admin">
+          {["ADMIN", "MODERATOR"].includes(session.user.role) && <Link href="/admin">
           <button className="bg-amber-50 shadow-2xl font-bold rounded-2xl p-2 hover:bg-yellow-200 text-black">
             Admin Panel
           </button>
@@ -39,18 +39,18 @@ export default function Navbar() {
         {(session.user.role == "MODERATOR" || session.user.role == "ADMIN") &&
          <Link href="/settings">
           <button className="bg-amber-50 shadow-2xl font-bold rounded-2xl p-2 hover:bg-yellow-200 text-black">
-            Settings
+            AI Buddy
           </button>
         </Link>}
         
-        <Link href="/endedproducts">
+        <Link href="/items">
           <button className="bg-amber-50 shadow-2xl font-bold rounded-2xl p-2 hover:bg-yellow-200 text-black">
-            View Ended
+           Live Auction
           </button>
         </Link>
-        <Link href="/search">
+        <Link href="/endedproducts">
           <button className="bg-amber-50 shadow-2xl font-bold rounded-2xl p-2 hover:bg-yellow-200 text-black">
-            Search
+            Ended Auctions
           </button>
         </Link>
         

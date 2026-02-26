@@ -17,10 +17,10 @@ export default function DashboardLayout({
             <div>{children}</div>
 
             {/* parallel slots (rendered when the corresponding route exists) */}
-            <div className="flex flex-wrap justify-between bg-black ">
-                <div>{notifications}</div>
-            <div>{history}</div>
-            <div>{feedback}</div>
+            <div className="flex flex-col justify-normal bg-black gap-5">
+                <div >{history}</div>
+                <div >{notifications}</div>
+            <div >{feedback}</div>
             </div>
             
         </div>

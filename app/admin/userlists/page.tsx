@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
-import Link from "next/link";
-import AuctionStatsChart from "../components/AuctionStatsChart";
+import Usertable from "./Usertable";
+import { number } from "framer-motion";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +14,7 @@ export default async function AdminPage() {
   if (!session || !["ADMIN", "MODERATOR"].includes(session.user.role)) {
     redirect("/unauthorized");
   }
+  
 
   const users = await prisma.user.findMany({
     select: {
@@ -22,20 +23,19 @@ export default async function AdminPage() {
       email: true,
       role: true,
       createdAt: true,
+      _count: {
+        select: {
+            bids: true
+        }
+      }
     },
   });
 
   return (
-    <>
     <div className="p-8 text-white">
       <h1 className="text-2xl font-bold">Admin Dashboard 🛡️</h1>
       <p>Welcome, {session.user.name}! You are an {session.user.role}.</p>
-      
-      <Link href="/admin/userlists"> <button className="bg-blue-600 hover:bg-blue-800 m-2 p-4">Users List</button></Link>
-      <Link href="/admin/actions"> <button className="bg-blue-600 hover:bg-blue-800 m-2 p-4">Committed Actions</button></Link>
+      <Usertable users={users} />
     </div>
-    <br />
-    <AuctionStatsChart/>
-    </>
   );
 }

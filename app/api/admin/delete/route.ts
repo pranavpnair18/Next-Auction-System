@@ -2,12 +2,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { logAdminAction } from "@/lib/auditLogger";
 
 const prisma = new PrismaClient()
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
-    if(!session || session.user.role !== "ADMIN"){
+    if(!session?.user.role || ["ADMIN", "MODERATOR"].includes(session?.user.role)){
         return NextResponse.json({error: "unauthorized", status:403})
     }
     try{
@@ -20,6 +21,12 @@ export async function POST(req: Request) {
         const deleted = await prisma.user.delete({
             where:{id: userid}
         })
+        await logAdminAction({
+                    adminId: Number(session.user.id),
+                    action: "Deleted User",
+                    target: userid,
+                    details: `User ID: ${userid}`,
+    });
         return NextResponse.json({success: true, user: deleted})
     }catch(err){
             console.log("caanot delete user", err);

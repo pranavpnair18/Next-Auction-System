@@ -25,6 +25,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   auctionItems  AuctionItem[] // ✅ Important: back-reference
+  bids          Bid[]       // all bids placed by the user
+  auditlog      AuditLog[]
+
 }
 
 enum Role{
@@ -79,7 +82,37 @@ model AuctionItem {
   currentBid  Float?    @default(0)
   endDate     DateTime
   createdAt   DateTime  @default(now())
+  completed   Boolean   @default(false)
 
   ownerId     Int
   owner       User      @relation(fields: [ownerId], references: [id])
+  bids        Bid[]       // all bids placed by the user
+
 }
+
+model Bid {
+  id         Int        @id @default(autoincrement())
+  amount     Float
+  createdAt  DateTime   @default(now())
+
+  // relations
+  bidderId   Int
+  bidder     User       @relation(fields: [bidderId], references: [id])
+  itemId     Int
+  item       AuctionItem @relation(fields: [itemId], references: [id])
+
+  @@index([itemId])
+  @@index([bidderId])
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  adminId     Int
+  action      String
+  target      String?   // e.g., user email, auction title, etc.
+  details     String?   // optional detailed info
+  createdAt   DateTime  @default(now())
+
+  admin       User      @relation(fields: [adminId], references: [id])
+}
+
