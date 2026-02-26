@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+type BidWithItem = Prisma.BidGetPayload<{
+  include: {
+    item: {
+      select: {
+        id: true;
+        title: true;
+      };
+    };
+  };
+}>;
+
 export async function GET() {
   try {
-    const bids = await prisma.bid.findMany({
+    const bids: BidWithItem[] = await prisma.bid.findMany({
       include: {
         item: {
           select: {
